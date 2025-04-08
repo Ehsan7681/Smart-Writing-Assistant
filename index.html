@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دستیار نویسنده هوشمند</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css">
+    
+    <!-- PWA مشخصات -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4a6da7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="دستیار نویسنده">
+    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
+</head>
+<body>
+    <div class="container">
+        <div class="glass-card main-card">
+            <!-- منوی اصلی با تب‌ها -->
+            <header>
+                <h1>دستیار نویسنده هوشمند</h1>
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="editor"><i class="fas fa-pen"></i> ویرایشگر</button>
+                    <button class="tab-btn" data-tab="projects"><i class="fas fa-book"></i> پروژه‌ها</button>
+                    <button class="tab-btn" data-tab="characters"><i class="fas fa-user"></i> شخصیت‌ها</button>
+                    <button class="tab-btn" data-tab="analysis"><i class="fas fa-chart-line"></i> تحلیل و آمار</button>
+                </div>
+            </header>
+            
+            <!-- صفحه ویرایشگر -->
+            <div class="tab-content" id="editorTab" style="display: block;">
+                <div class="tools">
+                    <div class="toolbar-left">
+                        <button id="clearBtn" class="btn"><i class="fas fa-eraser"></i> پاک کردن</button>
+                        <button id="copyBtn" class="btn"><i class="fas fa-copy"></i> کپی</button>
+                        <button id="saveBtn" class="btn"><i class="fas fa-save"></i> ذخیره</button>
+                    </div>
+                    <div class="toolbar-right">
+                        <button id="summarizeBtn" class="btn"><i class="fas fa-compress-alt"></i> خلاصه‌سازی</button>
+                        <button id="analyzeBtn" class="btn"><i class="fas fa-search"></i> تحلیل متن</button>
+                        <button id="aiHelpBtn" class="btn highlight"><i class="fas fa-robot"></i> کمک هوشمند</button>
+                        <button id="settingsBtn" class="btn"><i class="fas fa-cog"></i> تنظیمات</button>
+                    </div>
+                </div>
+                
+                <div class="project-info">
+                    <div class="project-title-container">
+                        <input type="text" id="currentProjectTitle" placeholder="عنوان پروژه" class="project-title-input">
+                    </div>
+                </div>
+                
+                <div class="editor-container">
+                    <div class="editor-wrapper">
+                        <textarea id="editor" placeholder="متن خود را اینجا بنویسید..."></textarea>
+                    </div>
+                    
+                    <div class="ai-suggestions glass-panel" id="aiSuggestions">
+                        <h3>پیشنهادات هوشمند</h3>
+                        <div class="suggestion-list" id="suggestionList">
+                            <div class="suggestion help-suggestion">
+                                <i class="fas fa-lightbulb"></i>
+                                <p><strong>راهنما:</strong> برای دریافت پیشنهادات بازنویسی، بهبود احساسات و اصلاح نگارشی، ابتدا بخشی از متن را انتخاب کنید و سپس روی دکمه "کمک هوشمند" کلیک کنید.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="word-count">
+                    <span id="wordCount">0</span> کلمه | 
+                    <span id="charCount">0</span> کاراکتر
+                </div>
+            </div>
+            
+            <!-- صفحه مدیریت پروژه‌ها -->
+            <div class="tab-content" id="projectsTab">
+                <div class="section-header">
+                    <h2>مدیریت پروژه‌ها</h2>
+                    <button id="newProjectBtn" class="btn highlight"><i class="fas fa-plus"></i> پروژه جدید</button>
+                </div>
+                
+                <div class="projects-list" id="projectsList">
+                    <!-- اینجا لیست پروژه‌ها به صورت پویا اضافه خواهد شد -->
+                </div>
+            </div>
+            
+            <!-- صفحه مدیریت شخصیت‌ها -->
+            <div class="tab-content" id="charactersTab">
+                <div class="section-header">
+                    <h2>مدیریت شخصیت‌ها</h2>
+                    <button id="extractCharactersBtn" class="btn highlight"><i class="fas fa-magic"></i> استخراج شخصیت‌ها از متن</button>
+                </div>
+                
+                <div class="characters-container">
+                    <div class="characters-list" id="charactersList">
+                        <!-- لیست شخصیت‌ها اینجا قرار می‌گیرد -->
+                    </div>
+                    
+                    <div class="character-detail-panel">
+                        <div class="no-selection-message">
+                            <i class="fas fa-user"></i>
+                            <p>لطفاً یک شخصیت را انتخاب کنید یا از دکمه استخراج شخصیت‌ها استفاده کنید</p>
+                        </div>
+                        
+                        <div class="character-edit-form" style="display: none;">
+                            <div class="form-group">
+                                <label>نام شخصیت</label>
+                                <input type="text" id="characterNameInput" placeholder="نام شخصیت">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>نقش در داستان</label>
+                                <select id="characterRoleInput">
+                                    <option value="protagonist">شخصیت اصلی</option>
+                                    <option value="antagonist">ضد قهرمان</option>
+                                    <option value="supporting">شخصیت فرعی</option>
+                                    <option value="minor">شخصیت جزئی</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>ویژگی‌های ظاهری</label>
+                                <textarea id="characterPhysicalInput" placeholder="توصیف ظاهری شخصیت..."></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>ویژگی‌های شخصیتی</label>
+                                <textarea id="characterPersonalityInput" placeholder="ویژگی‌های شخصیتی..."></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>پیشینه و تاریخچه</label>
+                                <textarea id="characterBackstoryInput" placeholder="داستان پیشینه شخصیت..."></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>اهداف و انگیزه‌ها</label>
+                                <textarea id="characterGoalsInput" placeholder="اهداف و انگیزه‌های شخصیت..."></textarea>
+                            </div>
+                            
+                            <div class="character-form-actions">
+                                <button id="saveCharacterBtn" class="btn highlight"><i class="fas fa-save"></i> ذخیره</button>
+                                <button id="generateCharacterBtn" class="btn"><i class="fas fa-magic"></i> تولید خودکار</button>
+                                <button id="deleteCharacterBtn" class="btn danger"><i class="fas fa-trash"></i> حذف</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- صفحه تحلیل و آمار -->
+            <div class="tab-content" id="analysisTab">
+                <div class="analysis-tabs">
+                    <button class="analysis-tab-btn active" data-analysis-tab="style">تحلیل سبک</button>
+                    <button class="analysis-tab-btn" data-analysis-tab="stats">آمار نوشتن</button>
+                    <button class="analysis-tab-btn" data-analysis-tab="summary">خلاصه داستان</button>
+                </div>
+                
+                <!-- بخش تحلیل سبک نوشتاری -->
+                <div class="analysis-content" id="styleAnalysisTab" style="display: block;">
+                    <div class="section-header">
+                        <h2>تحلیل سبک نوشتاری</h2>
+                        <button id="runStyleAnalysisBtn" class="btn highlight"><i class="fas fa-sync-alt"></i> تحلیل مجدد</button>
+                    </div>
+                    
+                    <div class="analysis-container">
+                        <div class="analysis-metrics">
+                            <div class="metric-card">
+                                <h3>میانگین طول جمله</h3>
+                                <div class="metric-value" id="avgSentenceLength">-</div>
+                                <div class="metric-suggestion" id="sentenceLengthSuggestion"></div>
+                            </div>
+                            
+                            <div class="metric-card">
+                                <h3>تنوع واژگان</h3>
+                                <div class="metric-value" id="lexicalDiversity">-</div>
+                                <div class="metric-suggestion" id="diversitySuggestion"></div>
+                            </div>
+                            
+                            <div class="metric-card">
+                                <h3>نسبت دیالوگ به روایت</h3>
+                                <div class="metric-value" id="dialogueRatio">-</div>
+                                <div class="metric-suggestion" id="dialogueSuggestion"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="repeating-words-section">
+                            <h3>کلمات تکراری</h3>
+                            <div class="repeating-words-list" id="repeatingWordsList"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- بخش آمار نوشتن -->
+                <div class="analysis-content" id="statsAnalysisTab">
+                    <div class="section-header">
+                        <h2>آمار نوشتن</h2>
+                        <div class="period-selector">
+                            <button class="period-btn active" data-period="week">هفته</button>
+                            <button class="period-btn" data-period="month">ماه</button>
+                            <button class="period-btn" data-period="year">سال</button>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-container">
+                        <div class="stats-summary">
+                            <div class="stat-card">
+                                <h3>تعداد کلمات امروز</h3>
+                                <div class="stat-value" id="todayWords">0</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <h3>میانگین روزانه</h3>
+                                <div class="stat-value" id="averageWords">0</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <h3>روزهای متوالی نوشتن</h3>
+                                <div class="stat-value" id="writingStreak">0</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <h3>هدف روزانه</h3>
+                                <div class="stat-value">
+                                    <input type="number" id="dailyGoalInput" min="1" value="500" class="goal-input"> کلمه
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stats-chart-container">
+                            <canvas id="writingStatsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- بخش خلاصه داستان -->
+                <div class="analysis-content" id="summaryAnalysisTab">
+                    <div class="section-header">
+                        <h2>خلاصه داستان</h2>
+                        <button id="generateSummaryBtn" class="btn highlight"><i class="fas fa-magic"></i> تولید خلاصه</button>
+                    </div>
+                    
+                    <div class="summary-container">
+                        <div class="summary-options">
+                            <label>طول خلاصه:</label>
+                            <select id="summaryLengthSelect">
+                                <option value="short">کوتاه (یک پاراگراف)</option>
+                                <option value="medium" selected>متوسط (۲-۳ پاراگراف)</option>
+                                <option value="long">بلند (چند پاراگراف)</option>
+                            </select>
+                            
+                            <label>سبک خلاصه:</label>
+                            <select id="summaryStyleSelect">
+                                <option value="descriptive">توصیفی</option>
+                                <option value="analytical" selected>تحلیلی</option>
+                                <option value="creative">خلاقانه</option>
+                            </select>
+                        </div>
+                        
+                        <div class="summary-result-container">
+                            <div class="summary-loading" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>در حال تولید خلاصه...</p>
+                            </div>
+                            
+                            <div class="summary-result" id="summaryResult">
+                                <p class="no-summary-message">برای تولید خلاصه داستان، روی دکمه "تولید خلاصه" کلیک کنید.</p>
+                            </div>
+                            
+                            <div class="summary-actions" style="display: none;">
+                                <button id="copySummaryBtn" class="btn"><i class="fas fa-copy"></i> کپی</button>
+                                <button id="regenerateSummaryBtn" class="btn"><i class="fas fa-sync-alt"></i> تولید مجدد</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- پاپ آپ تنظیمات -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h2>تنظیمات هوش مصنوعی</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="settings-group">
+                    <label for="apiKey">کلید API اوپن روتر</label>
+                    <div class="api-input-container">
+                        <input type="password" id="apiKey" placeholder="کلید API خود را وارد کنید">
+                        <button id="validateApiBtn" class="btn small-btn">بررسی اعتبار</button>
+                        <span id="apiStatus" class="api-status not-connected">
+                            <i class="fas fa-times-circle"></i>
+                        </span>
+                    </div>
+                    <small class="help-text">کلید API از <a href="https://openrouter.ai" target="_blank">openrouter.ai</a> دریافت کنید.</small>
+                </div>
+                
+                <div class="settings-group">
+                    <label for="modelSelect">انتخاب مدل هوش مصنوعی</label>
+                    <select id="modelSelect" disabled>
+                        <option value="">ابتدا اعتبار API را بررسی کنید</option>
+                    </select>
+                    <div class="model-info" id="modelInfo">
+                        <p>برای مشاهده اطلاعات مدل، یکی را انتخاب کنید.</p>
+                    </div>
+                </div>
+                
+                <div class="settings-actions">
+                    <button id="saveSettingsBtn" class="btn highlight disabled">ذخیره تنظیمات</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- پاپ آپ ایجاد پروژه جدید -->
+    <div id="newProjectModal" class="modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h2>ایجاد پروژه جدید</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="newProjectTitle">عنوان پروژه</label>
+                    <input type="text" id="newProjectTitle" placeholder="عنوان پروژه را وارد کنید">
+                </div>
+                
+                <div class="form-group">
+                    <label for="newProjectType">نوع پروژه</label>
+                    <select id="newProjectType">
+                        <option value="novel">رمان</option>
+                        <option value="short_story">داستان کوتاه</option>
+                        <option value="screenplay">فیلمنامه</option>
+                        <option value="other">سایر</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newProjectDescription">توضیحات</label>
+                    <textarea id="newProjectDescription" placeholder="توضیحات مختصر درباره پروژه (اختیاری)"></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button id="createProjectBtn" class="btn highlight">ایجاد پروژه</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- پاپ آپ تحلیل متن -->
+    <div id="textAnalysisModal" class="modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h2>تحلیل سبک نوشتاری</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="analysis-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>در حال تحلیل متن...</p>
+                </div>
+                
+                <div class="analysis-results">
+                    <div class="analysis-metrics-modal"></div>
+                    <div class="analysis-suggestions"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="theme.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
