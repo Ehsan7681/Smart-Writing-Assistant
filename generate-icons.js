@@ -5,7 +5,7 @@ const fs = require('fs');
 const sharp = require('sharp');
 
 const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
-const inputSvg = 'icons/icon-512x512.svg';
+const inputSvg = 'icons/icon.svg';
 
 // بررسی وجود دایرکتوری icons
 if (!fs.existsSync('icons')) {
@@ -17,6 +17,7 @@ async function generateIcons() {
     for (const size of sizes) {
       await sharp(inputSvg)
         .resize(size, size)
+        .png()
         .toFile(`icons/icon-${size}x${size}.png`);
       
       console.log(`آیکون ${size}x${size} ایجاد شد.`);
